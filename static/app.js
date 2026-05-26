@@ -80,7 +80,7 @@ function wireProductImage(img, productId) {
     if (visibleSoon && (!img.complete || img.naturalWidth === 0)) {
       useFallbackImage(img, productId);
     }
-  }, 5500);
+  }, 15000);
 }
 
 function productCard(product) {
@@ -123,7 +123,7 @@ function renderProducts() {
       const querySource = `${product.name} ${product.category} ${product.keyword} ${product.tone}`.toLowerCase();
       return categoryMatch && querySource.includes(query);
     })
-    .sort((a, b) => a.price - b.price);
+    .sort((a, b) => Number(b.isCustom) - Number(a.isCustom) || a.price - b.price);
 
   els.productGrid.innerHTML = "";
   if (!state.filtered.length) {
@@ -257,12 +257,12 @@ async function loadProducts() {
   renderAll();
 }
 
-async function regenerateProducts(mood) {
+async function regenerateProducts(keyword) {
   els.moodForm.classList.add("is-loading");
   const response = await fetch("/api/regenerate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mood }),
+    body: JSON.stringify({ keyword }),
   });
   const data = await response.json();
   state.products = data.items;
@@ -272,6 +272,7 @@ async function regenerateProducts(mood) {
   els.generatedAt.textContent = `생성 시각 ${new Date(data.generatedAt).toLocaleString("ko-KR")}`;
   els.productCount.textContent = `${data.items.length} items`;
   els.moodForm.classList.remove("is-loading");
+  els.searchInput.value = "";
   renderAll();
 }
 
@@ -312,7 +313,7 @@ document.addEventListener("click", (event) => {
 els.searchInput.addEventListener("input", renderProducts);
 els.moodForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  regenerateProducts(els.moodInput.value);
+  regenerateProducts(els.moodInput.value.trim());
 });
 els.checkoutButton.addEventListener("click", virtualCheckout);
 els.clearCartButton.addEventListener("click", () => {

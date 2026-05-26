@@ -4,6 +4,7 @@ import json
 import os
 import random
 from html import escape
+import urllib.parse
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -137,6 +138,7 @@ PALETTE = {
     "문구": ("#7c3aed", "#22c55e"),
     "푸드": ("#ea580c", "#16a34a"),
     "취미": ("#2563eb", "#f97316"),
+    "생성상품": ("#0f9f7a", "#1167d8"),
 }
 
 
@@ -173,6 +175,36 @@ OPEN_PRODUCT_FALLBACK_IMAGES = {
     "studio camera product photo": "https://cdn.dummyjson.com/product-images/mobile-accessories/tv-studio-camera-pedestal/thumbnail.webp",
     "tennis racket product photo": "https://cdn.dummyjson.com/product-images/sports-accessories/tennis-racket/thumbnail.webp",
 }
+
+
+CUSTOM_IMAGE_KEYWORDS = [
+    ("강아지 인형", "puppy plush toy"),
+    ("고양이 인형", "cat plush toy"),
+    ("곰 인형", "teddy bear plush toy"),
+    ("텀블러", "tumbler cup"),
+    ("립밤", "lip balm tube"),
+    ("에코백", "canvas tote bag"),
+    ("파우치", "small cosmetic pouch"),
+    ("폰케이스", "smartphone case"),
+    ("케이스", "minimal protective case"),
+    ("목걸이", "necklace jewelry"),
+    ("반지", "ring jewelry"),
+    ("스티커", "sticker pack"),
+    ("다이어리", "daily planner notebook"),
+    ("필통", "pencil case"),
+    ("쿠션", "decorative cushion"),
+    ("머그컵", "ceramic mug"),
+    ("머그", "ceramic mug"),
+    ("향초", "scented candle"),
+    ("키링", "keyring charm"),
+    ("인형", "plush toy"),
+    ("가방", "fashion bag"),
+    ("모자", "baseball cap"),
+    ("운동화", "sneakers"),
+    ("신발", "sneakers"),
+    ("우산", "folding umbrella"),
+    ("물병", "water bottle"),
+]
 
 
 PRICE_BANDS = [
@@ -217,11 +249,126 @@ def image_url(keyword: str, api_images: dict[int, str]) -> str:
     return OPEN_PRODUCT_FALLBACK_IMAGES.get(keyword, "/api/placeholder/missing.svg")
 
 
-def generate_products(mood: str = "zero market") -> dict[str, Any]:
+def infer_custom_category(keyword: str) -> str:
+    lowered = keyword.lower()
+    rules = [
+        ("패션", ["가방", "토트", "신발", "스니커즈", "옷", "셔츠", "드레스", "모자", "bag", "shoes", "shirt"]),
+        ("디지털", ["폰", "충전", "헤드폰", "이어폰", "키보드", "카메라", "노트북", "tablet", "camera", "phone"]),
+        ("리빙", ["텀블러", "컵", "머그", "램프", "침구", "의자", "책상", "프레임", "인테리어", "lamp", "mug"]),
+        ("뷰티", ["립", "립밤", "향수", "로션", "세럼", "크림", "화장", "perfume", "lotion", "beauty"]),
+        ("푸드", ["커피", "스낵", "과자", "도시락", "음료", "빵", "초콜릿", "coffee", "snack", "food"]),
+        ("문구", ["노트", "펜", "문구", "스티커", "다이어리", "연필", "notebook", "pen"]),
+        ("취미", ["인형", "라켓", "공", "운동", "게임", "그림", "피규어", "toy", "game", "racket"]),
+    ]
+    for category, words in rules:
+        if any(word in lowered for word in words):
+            return category
+    return "생성상품"
+
+
+def custom_image_url(keyword: str, seed: str) -> str:
+    image_keyword = image_prompt_keyword(keyword)
+    query = urllib.parse.urlencode({"q": image_keyword, "page_size": 6})
+    request = urllib.request.Request(
+        f"https://api.openverse.engineering/v1/images/?{query}",
+        headers={"User-Agent": "Mozilla/5.0"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=6) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return "/api/placeholder/missing.svg"
+
+    results = [item for item in payload.get("results", []) if item.get("thumbnail")]
+    if not results:
+        return "/api/placeholder/missing.svg"
+
+    index = sum(ord(char) for char in seed + image_keyword) % len(results)
+    rotated = results[index:] + results[:index]
+    for item in rotated:
+        thumbnail = item["thumbnail"]
+        if image_is_available(thumbnail):
+            return thumbnail
+    return "/api/placeholder/missing.svg"
+
+
+def image_is_available(url: str) -> bool:
+    request = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        with urllib.request.urlopen(request, timeout=2.5) as response:
+            content_type = response.headers.get("content-type", "")
+            return response.status == 200 and content_type.startswith("image/")
+    except Exception:
+        return False
+
+
+def image_prompt_keyword(keyword: str) -> str:
+    lowered = keyword.lower()
+    for source, target in CUSTOM_IMAGE_KEYWORDS:
+        if source in lowered:
+            return target
+    if keyword.isascii():
+        return keyword
+
+    category = infer_custom_category(keyword)
+    fallback_prompts = {
+        "패션": "modern fashion accessory",
+        "디지털": "compact tech gadget",
+        "리빙": "minimal home lifestyle product",
+        "뷰티": "cosmetic beauty product",
+        "푸드": "packaged snack product",
+        "문구": "stationery product set",
+        "취미": "hobby toy product",
+    }
+    return fallback_prompts.get(category, "minimal lifestyle product")
+
+
+def build_custom_product(keyword: str) -> dict[str, Any]:
+    uid = uuid4().hex[:8]
+    trimmed = keyword.strip()[:32]
+    category = infer_custom_category(trimmed)
+    price_band = random.choice(PRICE_BANDS[:6])
+    price = money(price_band)
+    adjective = random.choice(ADJECTIVES)
+    color_pair = PALETTE.get(category, PALETTE["생성상품"])
+
+    return {
+        "id": uid,
+        "name": f"{adjective} {trimmed}",
+        "category": category,
+        "keyword": trimmed,
+        "price": price,
+        "priceTier": price_band[0],
+        "virtualPrice": f"{price:,}원",
+        "tone": "입력한 키워드로 새로 만든 가상 상품",
+        "description": (
+            f"'{trimmed}' 키워드로 생성한 가상 상품입니다. "
+            "오픈 이미지 API로 상품 사진을 불러오고, 실제 결제 없이 체험만 제공합니다."
+        ),
+        "features": [
+            "사용자가 입력한 키워드로 생성된 상품이에요.",
+            "실제 구매 없이 쇼핑의 흐름만 체험할 수 있어요.",
+            "키워드 기반 오픈 이미지 API로 사진을 불러와요.",
+        ],
+        "image": custom_image_url(trimmed, uid),
+        "seed": uid,
+        "accent": color_pair,
+        "inventory": random.randint(1, 12),
+        "rating": round(random.uniform(4.2, 4.9), 1),
+        "isCustom": True,
+    }
+
+
+def generate_products(mood: str = "zero market", custom_keyword: str = "") -> dict[str, Any]:
     DATA_DIR.mkdir(exist_ok=True)
     items = []
-    seeds = random.sample(CATALOG_SEEDS, k=12)
+    cleaned_keyword = custom_keyword.strip()
+    seed_count = 11 if cleaned_keyword else 12
+    seeds = random.sample(CATALOG_SEEDS, k=seed_count)
     api_images = fetch_open_product_images()
+
+    if cleaned_keyword:
+        items.append(build_custom_product(cleaned_keyword))
 
     for index, seed_data in enumerate(seeds, start=1):
         uid = uuid4().hex[:8]
@@ -252,6 +399,7 @@ def generate_products(mood: str = "zero market") -> dict[str, Any]:
                 "accent": PALETTE.get(category, ("#1167d8", "#f8485e")),
                 "inventory": random.randint(6, 34),
                 "rating": round(random.uniform(4.1, 4.9), 1),
+                "isCustom": False,
             }
         )
 
@@ -259,6 +407,7 @@ def generate_products(mood: str = "zero market") -> dict[str, Any]:
         "brand": "Zero Market",
         "subtitle": "소비 없는 소비 경험",
         "mood": mood,
+        "customKeyword": cleaned_keyword,
         "generatedAt": datetime.now().isoformat(timespec="seconds"),
         "items": items,
     }
@@ -448,8 +597,9 @@ def products() -> Response:
 @app.post("/api/regenerate")
 def regenerate() -> Response:
     payload = request.get_json(silent=True) or {}
-    mood = str(payload.get("mood") or "zero market").strip()[:40]
-    return jsonify(generate_products(mood=mood or "zero market"))
+    keyword = str(payload.get("keyword") or payload.get("mood") or "").strip()[:32]
+    mood = keyword or "zero market"
+    return jsonify(generate_products(mood=mood, custom_keyword=keyword))
 
 
 @app.post("/api/checkout")
