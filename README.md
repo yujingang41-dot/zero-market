@@ -17,9 +17,8 @@ python3 app.py
 
 ## Render 배포
 
-Render에서 GitHub 저장소를 Web Service로 연결한 뒤 아래 값으로 배포합니다.
+Render에서 `New +` -> `Web Service`를 선택하고 GitHub 저장소를 연결한 뒤 아래 값으로 배포합니다.
 
 - Build Command: `pip install -r requirements.txt`
 - Start Command: `gunicorn app:app`
-
-`render.yaml`을 사용하는 경우 Render가 설정을 자동으로 읽을 수 있습니다.
+- Instance Type: `Free`
