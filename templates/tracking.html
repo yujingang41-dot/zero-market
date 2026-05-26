@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>배송 조회 - Zero Market</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script defer src="{{ url_for('static', filename='tracking.js') }}"></script>
+  </head>
+  <body>
+    <main class="tracking-shell">
+      <header class="tracking-header">
+        <a class="brand" href="/">
+          <span class="brand-mark">Z</span>
+          <span>
+            <strong>Zero Market</strong>
+            <small>가짜 배송 조회</small>
+          </span>
+        </a>
+        <a class="ghost-action" href="/">
+          <i data-lucide="arrow-left"></i>
+          홈으로
+        </a>
+      </header>
+
+      <section class="tracking-card">
+        <div>
+          <p class="eyebrow">Virtual Delivery</p>
+          <h1>택배 배송 조회</h1>
+          <p>주문 번호를 입력하면 집까지 오는 것처럼 구성된 가상 배송 진행도를 보여줍니다.</p>
+        </div>
+        <form class="tracking-form" id="trackingForm">
+          <label for="trackingInput">주문 번호</label>
+          <div class="input-row">
+            <input id="trackingInput" type="text" placeholder="예: ZERO-ABC123" autocomplete="off" />
+            <button class="primary-action" type="submit">
+              <i data-lucide="search"></i>
+              조회
+            </button>
+          </div>
+        </form>
+        <p class="tracking-notice">
+          이 화면은 프로젝트 체험용 가상 배송 조회입니다. 실제 택배 접수, 배송, 위치 추적은 진행되지 않습니다.
+        </p>
+      </section>
+
+      <section class="tracking-result" id="trackingResult" hidden>
+        <div class="delivery-map">
+          <div class="route-line">
+            <span id="routeFill"></span>
+          </div>
+          <div class="truck-marker" id="truckMarker">
+            <i data-lucide="truck"></i>
+          </div>
+          <div class="home-marker">
+            <i data-lucide="home"></i>
+          </div>
+        </div>
+        <div class="tracking-summary">
+          <p class="eyebrow">Order</p>
+          <h2 id="trackingOrderId">ZERO-READY</h2>
+          <strong id="trackingHeadline">배송 준비 중</strong>
+          <p id="trackingMessage"></p>
+        </div>
+        <ol class="tracking-steps" id="trackingSteps"></ol>
+      </section>
+    </main>
+  </body>
+</html>

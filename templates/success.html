@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>결제 완료 - Zero Market</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script defer src="{{ url_for('static', filename='success.js') }}"></script>
+  </head>
+  <body class="celebration-page">
+    <main class="event-shell">
+      <section class="success-hero" aria-live="polite">
+        <div class="confetti-field" id="confettiField"></div>
+        <a class="brand success-brand" href="/">
+          <span class="brand-mark">Z</span>
+          <span>
+            <strong>Zero Market</strong>
+            <small>가상 결제 완료</small>
+          </span>
+        </a>
+        <div class="success-badge">
+          <i data-lucide="party-popper"></i>
+        </div>
+        <p class="eyebrow">Virtual Payment</p>
+        <h1>결제 축하해요!</h1>
+        <p class="success-copy">주문이 가상으로 접수되었습니다. 실제 결제, 배송, 청구는 발생하지 않습니다.</p>
+        <div class="order-ticket">
+          <span>주문 번호</span>
+          <strong id="successOrderId">ZERO-READY</strong>
+          <button class="icon-button" id="copyOrderButton" type="button" aria-label="주문번호 복사">
+            <i data-lucide="copy"></i>
+          </button>
+        </div>
+        <div class="success-stats">
+          <div>
+            <span>상품 수</span>
+            <strong id="successItemCount">0개</strong>
+          </div>
+          <div>
+            <span>가상 결제 금액</span>
+            <strong id="successTotal">0원</strong>
+          </div>
+        </div>
+        <div class="success-actions">
+          <a class="primary-action" id="trackingLink" href="/tracking">
+            <i data-lucide="truck"></i>
+            배송 조회하기
+          </a>
+          <a class="ghost-action" href="/">
+            <i data-lucide="shopping-bag"></i>
+            쇼핑 계속하기
+          </a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

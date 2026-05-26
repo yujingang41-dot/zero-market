@@ -286,9 +286,16 @@ async function virtualCheckout() {
     body: JSON.stringify(payload),
   });
   const result = await response.json();
-  els.receiptTitle.textContent = `${result.orderId} 완료`;
-  els.receiptMessage.textContent = `${result.itemCount}개 상품, ${formatWon.format(result.total)} 체험. ${result.message}`;
-  els.checkoutResult.hidden = false;
+  const order = {
+    orderId: result.orderId,
+    itemCount: result.itemCount,
+    total: result.total,
+    completedAt: result.completedAt,
+  };
+  localStorage.setItem("zero-market-last-order", JSON.stringify(order));
+  state.cart = {};
+  persistCart();
+  window.location.href = `/success?order=${encodeURIComponent(result.orderId)}`;
 }
 
 document.addEventListener("click", (event) => {

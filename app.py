@@ -589,6 +589,16 @@ def index() -> str:
     return render_template("index.html")
 
 
+@app.route("/success")
+def success() -> str:
+    return render_template("success.html")
+
+
+@app.route("/tracking")
+def tracking() -> str:
+    return render_template("tracking.html")
+
+
 @app.get("/api/products")
 def products() -> Response:
     return jsonify(load_products())

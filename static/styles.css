@@ -261,6 +261,10 @@ button {
   width: 100%;
 }
 
+.ghost-action.full {
+  width: 100%;
+}
+
 .primary-action:disabled {
   cursor: not-allowed;
   opacity: 0.46;
@@ -657,6 +661,333 @@ svg {
   stroke-width: 2.2;
 }
 
+.celebration-page {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.event-shell,
+.tracking-shell {
+  width: min(1040px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 34px 0;
+}
+
+.success-hero,
+.tracking-card,
+.tracking-result {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.success-hero {
+  display: grid;
+  min-height: calc(100vh - 68px);
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 42px;
+  text-align: center;
+}
+
+.success-brand {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+}
+
+.success-badge {
+  display: grid;
+  width: 82px;
+  height: 82px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 16px 32px rgba(18, 19, 24, 0.18);
+}
+
+.success-badge svg {
+  width: 36px;
+  height: 36px;
+}
+
+.success-hero h1,
+.tracking-card h1 {
+  margin: 0;
+  font-size: clamp(40px, 7vw, 76px);
+  line-height: 0.98;
+}
+
+.success-copy,
+.tracking-card p,
+.tracking-summary p,
+.tracking-steps p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.order-ticket {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px 12px;
+  width: min(520px, 100%);
+  border: 1px dashed #9aa5b5;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 18px;
+  text-align: left;
+}
+
+.order-ticket span {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.order-ticket strong {
+  font-size: clamp(26px, 5vw, 40px);
+  letter-spacing: 0;
+}
+
+.success-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: min(520px, 100%);
+}
+
+.success-stats div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 16px;
+  text-align: left;
+}
+
+.success-stats span,
+.tracking-form label {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.success-stats strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 24px;
+}
+
+.success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.confetti-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.confetti-field span {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 18px;
+  border-radius: 2px;
+  animation: confetti-fall 3s linear forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(92vh) rotate(540deg);
+  }
+}
+
+.tracking-shell {
+  display: grid;
+  gap: 18px;
+}
+
+.tracking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.tracking-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+  gap: 22px;
+  padding: 28px;
+}
+
+.tracking-card h1 {
+  margin-top: 6px;
+  font-size: clamp(34px, 5vw, 56px);
+}
+
+.tracking-form {
+  display: grid;
+  align-content: end;
+  gap: 8px;
+}
+
+.tracking-notice {
+  grid-column: 1 / -1;
+  margin: 0;
+  border-left: 4px solid var(--coral);
+  background: #fff5f6;
+  padding: 12px 14px;
+}
+
+.tracking-result {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+  gap: 22px;
+  padding: 28px;
+}
+
+.delivery-map {
+  position: relative;
+  min-height: 300px;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(17, 103, 216, 0.09), transparent 42%),
+    linear-gradient(315deg, rgba(15, 159, 122, 0.12), transparent 44%),
+    #f8fafc;
+}
+
+.route-line {
+  position: absolute;
+  right: 54px;
+  bottom: 74px;
+  left: 54px;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #d7dde8;
+}
+
+.route-line span {
+  display: block;
+  width: 10%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--blue), var(--green));
+  transition: width 400ms ease;
+}
+
+.truck-marker,
+.home-marker {
+  position: absolute;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 999px;
+  box-shadow: 0 12px 24px rgba(18, 19, 24, 0.12);
+}
+
+.truck-marker {
+  bottom: 52px;
+  left: 12%;
+  background: var(--ink);
+  color: #fff;
+  transform: translateX(-50%);
+  transition: left 400ms ease;
+}
+
+.home-marker {
+  right: 28px;
+  bottom: 52px;
+  background: var(--coral);
+  color: #fff;
+}
+
+.tracking-summary {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+}
+
+.tracking-summary h2 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 44px);
+}
+
+.tracking-summary strong {
+  font-size: 24px;
+}
+
+.tracking-steps {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tracking-steps li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+}
+
+.tracking-steps li > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.tracking-steps li.done > span {
+  background: var(--green);
+  color: #fff;
+}
+
+.tracking-steps li.current {
+  border-color: var(--blue);
+  box-shadow: 0 12px 24px rgba(17, 103, 216, 0.08);
+}
+
+.tracking-steps li.current > span {
+  background: var(--blue);
+  color: #fff;
+}
+
+.tracking-steps strong,
+.tracking-steps p {
+  margin: 0;
+}
+
 @media (max-width: 1180px) {
   .app-shell {
     grid-template-columns: 88px minmax(0, 1fr) 330px;
@@ -702,6 +1033,8 @@ svg {
   }
 
   .control-band,
+  .tracking-card,
+  .tracking-result,
   .dialog-body {
     grid-template-columns: 1fr;
   }
@@ -719,6 +1052,8 @@ svg {
   .top-bar,
   .zero-note,
   .input-row,
+  .tracking-header,
+  .success-actions,
   .dialog-actions {
     align-items: stretch;
     flex-direction: column;
@@ -743,5 +1078,19 @@ svg {
 
   .dialog-copy {
     padding: 28px;
+  }
+
+  .success-hero,
+  .tracking-card,
+  .tracking-result {
+    padding: 22px;
+  }
+
+  .success-brand {
+    position: static;
+  }
+
+  .success-stats {
+    grid-template-columns: 1fr;
   }
 }
