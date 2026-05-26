@@ -4,7 +4,7 @@ import json
 import os
 import random
 from html import escape
-import urllib.parse
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -41,14 +41,14 @@ CATALOG_SEEDS = [
     },
     {
         "category": "디지털",
-        "keyword": "compact mechanical keyboard",
-        "name": "미니 키보드",
-        "tone": "책상 위 작은 리듬",
+        "keyword": "wireless charging pad product photo",
+        "name": "무선 충전 패드",
+        "tone": "책상 위 전원을 정리하는 장치",
     },
     {
         "category": "리빙",
-        "keyword": "ceramic mug product photo",
-        "name": "세라믹 머그",
+        "keyword": "black aluminium cup product photo",
+        "name": "블랙 알루미늄 컵",
         "tone": "오후를 천천히 잡아주는 컵",
     },
     {
@@ -59,9 +59,9 @@ CATALOG_SEEDS = [
     },
     {
         "category": "뷰티",
-        "keyword": "skincare serum bottle product photo",
-        "name": "세럼 보틀",
-        "tone": "반짝이는 루틴의 시작",
+        "keyword": "face lotion product photo",
+        "name": "페이스 로션",
+        "tone": "가볍게 시작하는 스킨케어 루틴",
     },
     {
         "category": "뷰티",
@@ -70,10 +70,10 @@ CATALOG_SEEDS = [
         "tone": "작게 남기는 선명한 향",
     },
     {
-        "category": "문구",
-        "keyword": "premium notebook product photo",
-        "name": "프리미엄 노트",
-        "tone": "아이디어가 머무는 페이지",
+        "category": "리빙",
+        "keyword": "family tree photo frame product photo",
+        "name": "포토 프레임",
+        "tone": "책상 위 기억을 세우는 프레임",
     },
     {
         "category": "문구",
@@ -83,27 +83,27 @@ CATALOG_SEEDS = [
     },
     {
         "category": "푸드",
-        "keyword": "specialty coffee beans package",
-        "name": "스페셜티 원두",
+        "keyword": "specialty coffee package",
+        "name": "커피 패키지",
         "tone": "집에서 여는 작은 카페",
     },
     {
         "category": "푸드",
-        "keyword": "vegan snack box product photo",
-        "name": "비건 스낵 박스",
+        "keyword": "lunch box product photo",
+        "name": "런치 박스",
         "tone": "가볍게 채우는 간식 시간",
     },
     {
         "category": "취미",
-        "keyword": "instant film camera product photo",
-        "name": "필름 카메라",
-        "tone": "순간을 천천히 남기는 취미",
+        "keyword": "studio camera product photo",
+        "name": "스튜디오 카메라",
+        "tone": "장면을 또렷하게 남기는 취미",
     },
     {
         "category": "취미",
-        "keyword": "watercolor paint set product photo",
-        "name": "수채화 팔레트",
-        "tone": "색으로 쉬는 짧은 휴식",
+        "keyword": "tennis racket product photo",
+        "name": "테니스 라켓",
+        "tone": "몸을 가볍게 깨우는 취미",
     },
 ]
 
@@ -140,6 +140,41 @@ PALETTE = {
 }
 
 
+OPEN_PRODUCT_IMAGE_IDS = {
+    "minimal canvas tote bag": 176,
+    "retro running sneakers": 92,
+    "wireless headphones product photo": 101,
+    "wireless charging pad product photo": 102,
+    "black aluminium cup product photo": 49,
+    "linen bedding set product photo": 11,
+    "face lotion product photo": 120,
+    "solid perfume compact product photo": 6,
+    "family tree photo frame product photo": 44,
+    "desk lamp product photo": 47,
+    "specialty coffee package": 34,
+    "lunch box product photo": 65,
+    "studio camera product photo": 112,
+    "tennis racket product photo": 152,
+}
+
+OPEN_PRODUCT_FALLBACK_IMAGES = {
+    "minimal canvas tote bag": "https://cdn.dummyjson.com/product-images/womens-bags/women-handbag-black/thumbnail.webp",
+    "retro running sneakers": "https://cdn.dummyjson.com/product-images/mens-shoes/sports-sneakers-off-white-red/thumbnail.webp",
+    "wireless headphones product photo": "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpods-max-silver/thumbnail.webp",
+    "wireless charging pad product photo": "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpower-wireless-charger/thumbnail.webp",
+    "black aluminium cup product photo": "https://cdn.dummyjson.com/product-images/kitchen-accessories/black-aluminium-cup/thumbnail.webp",
+    "linen bedding set product photo": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/thumbnail.webp",
+    "face lotion product photo": "https://cdn.dummyjson.com/product-images/skin-care/vaseline-men-body-and-face-lotion/thumbnail.webp",
+    "solid perfume compact product photo": "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/thumbnail.webp",
+    "family tree photo frame product photo": "https://cdn.dummyjson.com/product-images/home-decoration/family-tree-photo-frame/thumbnail.webp",
+    "desk lamp product photo": "https://cdn.dummyjson.com/product-images/home-decoration/table-lamp/thumbnail.webp",
+    "specialty coffee package": "https://cdn.dummyjson.com/product-images/groceries/nescafe-coffee/thumbnail.webp",
+    "lunch box product photo": "https://cdn.dummyjson.com/product-images/kitchen-accessories/lunch-box/thumbnail.webp",
+    "studio camera product photo": "https://cdn.dummyjson.com/product-images/mobile-accessories/tv-studio-camera-pedestal/thumbnail.webp",
+    "tennis racket product photo": "https://cdn.dummyjson.com/product-images/sports-accessories/tennis-racket/thumbnail.webp",
+}
+
+
 PRICE_BANDS = [
     ("초저가", 1_000, 4_500, 500),
     ("알뜰가", 5_000, 9_000, 1_000),
@@ -157,22 +192,36 @@ def money(price_band: tuple[str, int, int, int]) -> int:
     return random.randrange(low, high + step, step)
 
 
-def image_url(keyword: str, seed: str, mood: str) -> str:
-    prompt = (
-        f"{keyword}, {mood}, clean ecommerce product photography, "
-        "single object, bright studio light, realistic, high detail"
+def fetch_open_product_images() -> dict[int, str]:
+    request = urllib.request.Request(
+        "https://dummyjson.com/products?limit=200&select=id,thumbnail",
+        headers={"User-Agent": "Mozilla/5.0"},
     )
-    encoded = urllib.parse.quote(prompt)
-    return (
-        f"https://image.pollinations.ai/prompt/{encoded}"
-        f"?width=900&height=900&seed={seed}&nologo=true"
-    )
+    try:
+        with urllib.request.urlopen(request, timeout=8) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return {}
+
+    return {
+        int(product["id"]): product["thumbnail"]
+        for product in payload.get("products", [])
+        if product.get("id") and product.get("thumbnail")
+    }
+
+
+def image_url(keyword: str, api_images: dict[int, str]) -> str:
+    product_id = OPEN_PRODUCT_IMAGE_IDS.get(keyword)
+    if product_id and product_id in api_images:
+        return api_images[product_id]
+    return OPEN_PRODUCT_FALLBACK_IMAGES.get(keyword, "/api/placeholder/missing.svg")
 
 
 def generate_products(mood: str = "zero market") -> dict[str, Any]:
     DATA_DIR.mkdir(exist_ok=True)
     items = []
     seeds = random.sample(CATALOG_SEEDS, k=12)
+    api_images = fetch_open_product_images()
 
     for index, seed_data in enumerate(seeds, start=1):
         uid = uuid4().hex[:8]
@@ -198,7 +247,7 @@ def generate_products(mood: str = "zero market") -> dict[str, Any]:
                     "상품을 살펴보고 장바구니에 담을 수 있지만 실제 구매는 진행되지 않습니다."
                 ),
                 "features": benefit,
-                "image": image_url(seed_data["keyword"], product_seed, mood),
+                "image": image_url(seed_data["keyword"], api_images),
                 "seed": product_seed,
                 "accent": PALETTE.get(category, ("#1167d8", "#f8485e")),
                 "inventory": random.randint(6, 34),
@@ -342,6 +391,50 @@ def product_illustration(name: str, category: str, color_a: str, color_b: str) -
     return common + art + label
 
 
+def studio_photo_fallback(name: str, category: str, color_a: str, color_b: str) -> str:
+    return f"""
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="0.52" stop-color="#eef3f9"/>
+      <stop offset="1" stop-color="#e8edf6"/>
+    </linearGradient>
+    <linearGradient id="object" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="{color_a}"/>
+      <stop offset="1" stop-color="{color_b}"/>
+    </linearGradient>
+    <radialGradient id="light" cx="42%" cy="24%" r="72%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="20"/>
+      <feOffset dx="0" dy="24" result="offset"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.22"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="900" height="900" fill="url(#bg)"/>
+  <rect width="900" height="900" fill="url(#light)"/>
+  <path d="M-30 676 C166 566 316 602 486 510 C648 422 766 468 930 350 V900 H-30 Z" fill="{color_a}" opacity="0.12"/>
+  <ellipse cx="458" cy="662" rx="250" ry="48" fill="#111827" opacity="0.13"/>
+  <g filter="url(#shadow)">
+    <rect x="296" y="244" width="308" height="348" rx="58" fill="url(#object)"/>
+    <path d="M296 330 C364 285 468 292 604 254 V244 H354 C322 244 296 270 296 302 Z" fill="#ffffff" opacity="0.28"/>
+    <rect x="348" y="416" width="204" height="112" rx="28" fill="#ffffff" opacity="0.3"/>
+    <rect x="376" y="454" width="148" height="18" rx="9" fill="#ffffff" opacity="0.64"/>
+    <rect x="396" y="492" width="108" height="14" rx="7" fill="#ffffff" opacity="0.45"/>
+  </g>
+  <text x="450" y="748" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="800" fill="#111827">{escape(name)}</text>
+  <text x="450" y="796" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" fill="#64748b">{escape(category)} 대체 상품 이미지</text>
+"""
+
+
 @app.route("/")
 def index() -> str:
     return render_template("index.html")
@@ -395,7 +488,7 @@ def placeholder(product_id: str) -> Response:
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" '
         f'role="img" aria-label="{escape(name)}">'
-        f"{product_illustration(name, category, color_a, color_b)}</svg>"
+        f"{studio_photo_fallback(name, category, color_a, color_b)}</svg>"
     )
     return Response(svg, mimetype="image/svg+xml")
 

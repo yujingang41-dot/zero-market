@@ -352,7 +352,8 @@ button {
 .dialog-image img {
   display: block;
   width: 100%;
-  object-fit: cover;
+  background: #f3f5f9;
+  object-fit: contain;
 }
 
 .product-card img {

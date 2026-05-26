@@ -62,9 +62,25 @@ function cartTotals() {
   );
 }
 
-function fallbackImage(event, productId) {
-  event.currentTarget.onerror = null;
-  event.currentTarget.src = `/api/placeholder/${productId}.svg`;
+function useFallbackImage(img, productId) {
+  if (img.dataset.fallback === "true") return;
+  img.dataset.fallback = "true";
+  img.onerror = null;
+  img.src = `/api/placeholder/${productId}.svg`;
+}
+
+function wireProductImage(img, productId) {
+  img.addEventListener("load", () => {
+    img.dataset.loaded = "true";
+  });
+  img.addEventListener("error", () => useFallbackImage(img, productId));
+
+  window.setTimeout(() => {
+    const visibleSoon = img.getBoundingClientRect().top < window.innerHeight + 120;
+    if (visibleSoon && (!img.complete || img.naturalWidth === 0)) {
+      useFallbackImage(img, productId);
+    }
+  }, 5500);
 }
 
 function productCard(product) {
@@ -95,7 +111,7 @@ function productCard(product) {
       </div>
     </div>
   `;
-  article.querySelector("img").addEventListener("error", (event) => fallbackImage(event, product.id));
+  wireProductImage(article.querySelector("img"), product.id);
   return article;
 }
 
@@ -171,7 +187,7 @@ function renderCart() {
       .join("");
     els.cartLines.querySelectorAll("img").forEach((img) => {
       const line = lines.find(({ product }) => product.id === img.dataset.productImage);
-      if (line) img.addEventListener("error", (event) => fallbackImage(event, line.product.id));
+      if (line) wireProductImage(img, line.product.id);
     });
   }
   refreshIcons();
@@ -226,7 +242,7 @@ function openDetail(productId) {
       </div>
     </div>
   `;
-  els.dialogBody.querySelector("img").addEventListener("error", (event) => fallbackImage(event, product.id));
+  wireProductImage(els.dialogBody.querySelector("img"), product.id);
   refreshIcons();
   els.productDialog.showModal();
 }
